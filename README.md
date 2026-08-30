@@ -1,2 +1,2 @@
 # MuninnMonitor
-Muninn watches your model learn and brings you the insights.
+A lightweight real-time monitor for visualizing machine learning training progress.
