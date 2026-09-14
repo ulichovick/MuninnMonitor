@@ -4,8 +4,10 @@ import time
 from queue import Empty
 from PySide6.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout
 from PySide6.QtCore import QTimer
+import pyqtgraph as pg
+import numpy as np
 
-
+#recibir datos y graficarlos
 def gui_process(queue, stop_event):
     app = QApplication(sys.argv)
     window = QWidget()
@@ -24,7 +26,7 @@ def gui_process(queue, stop_event):
             if item is None:
                         app.quit()
                         return
-            label.setText("Press [Crow] "+ str(item) +" to Crow!")
+            label.setText("Press [Crow] "+ str(item[0]) +" to Crow! "+ str(item[1]))
         
     app.aboutToQuit.connect(stop_event.set)
     timer = QTimer()
@@ -34,15 +36,22 @@ def gui_process(queue, stop_event):
 
 
 if __name__ == "__main__":
-    
+    np.random.seed(67)
+    X = np.linspace(0, 1, 100)
+    w = 1.5
+    b = 0.25
+    noise = np.random.normal(0, 1.5, size=X.shape)
+    y = w*X+b+noise
+
     q = mp.Queue()
     stop_event = mp.Event()
     w = mp.Process(target=gui_process, args=(q, stop_event))
     w.start()
-    for i in range(100):
+    for a,b in np.nditer([X, y]):
         if stop_event.is_set():
             break
-        q.put(i)
+        data = [a,b]
+        q.put(data)
         time.sleep(1)
     q.put(None)
     w.join()
